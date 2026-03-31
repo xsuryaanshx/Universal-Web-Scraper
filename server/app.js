@@ -2,13 +2,18 @@ const express = require("express");
 const cors = require("cors");
 const { exec } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// serve frontend
-app.use(express.static(path.join(__dirname, "../client")));
+// ensure output folder exists
+const outputDir = path.join(__dirname, "../output");
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir);
+}
 
 app.post("/scrape", (req, res) => {
   const url = req.body.url;
@@ -25,11 +30,18 @@ app.post("/scrape", (req, res) => {
 
     console.log(stdout);
 
-    const filePath = path.join(__dirname, "../output/data.csv");
+    const filePath = path.join(outputDir, "data.csv");
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(500).send("File not generated");
+    }
+
     res.download(filePath);
   });
 });
 
-app.listen(3000, () =>
-  console.log("🚀 Server running at http://localhost:3000")
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
 );
