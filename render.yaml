@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: universal-scraper
+    env: node
+    buildCommand: |
+      npm install
+      cd server && npm install
+      pip install -r scraper/requirements.txt
+    startCommand: npm start
