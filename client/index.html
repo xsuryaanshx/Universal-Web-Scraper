@@ -16,16 +16,16 @@
       const url = document.getElementById("url").value;
       const status = document.getElementById("status");
 
-      status.innerText = "Scraping... please wait ⏳";
+      status.innerText = "Scraping... ⏳";
 
-      const res = await fetch("/scrape", {
+      const res = await fetch("https://YOUR-RENDER-URL.onrender.com/scrape", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ url })
       });
 
       if (!res.ok) {
-        status.innerText = "Error occurred ❌";
+        status.innerText = "Error ❌";
         return;
       }
 
@@ -36,7 +36,7 @@
       a.download = "data.csv";
       a.click();
 
-      status.innerText = "Done ✅ File downloaded";
+      status.innerText = "Done ✅";
     }
   </script>
 </body>
