@@ -4,9 +4,9 @@
   <title>Universal Scraper</title>
 </head>
 <body>
-  <h2>🌐 Universal Website Scraper</h2>
+  <h2>Universal Scraper</h2>
 
-  <input id="url" placeholder="Enter website URL" style="width:300px;" />
+  <input id="url" placeholder="Enter URL" />
   <button onclick="scrape()">Scrape</button>
 
   <p id="status"></p>
@@ -16,9 +16,9 @@
       const url = document.getElementById("url").value;
       const status = document.getElementById("status");
 
-      status.innerText = "Scraping... ⏳";
+      status.innerText = "Running...";
 
-      const res = await fetch("https://universal-web-scraper-tj50.onrender.com", {
+      const res = await fetch("https://YOUR-RAILWAY-URL/scrape", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ url })
