@@ -1,26 +1,26 @@
 import sys
-import time
-import pandas as pd
-from selenium import webdriver
+import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 from urllib.parse import urljoin
 
 visited = set()
-MAX_PAGES = 10  # prevent infinite crawl
+MAX_PAGES = 5
 
-def scrape_page(driver, url):
-    driver.get(url)
-    time.sleep(2)
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+def scrape(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    res = requests.get(url, headers=headers, timeout=10)
+    soup = BeautifulSoup(res.text, "html.parser")
 
     data = []
 
-    # 🔥 Generic scraping (edit selectors per site)
-    items = soup.find_all("div")
-
-    for item in items[:20]:
-        text = item.get_text(strip=True)
+    # basic extraction (edit later for smarter scraping)
+    for tag in soup.find_all(["h1", "h2", "p"]):
+        text = tag.get_text(strip=True)
         if text:
             data.append({"content": text})
 
@@ -28,7 +28,6 @@ def scrape_page(driver, url):
 
 
 def crawl(start_url):
-    driver = webdriver.Chrome()
     to_visit = [start_url]
     all_data = []
 
@@ -38,11 +37,11 @@ def crawl(start_url):
         if url in visited:
             continue
 
-        print(f"Visiting: {url}")
+        print("Visiting:", url)
         visited.add(url)
 
         try:
-            data, soup = scrape_page(driver, url)
+            data, soup = scrape(url)
             all_data.extend(data)
 
             links = soup.find_all("a", href=True)
@@ -56,15 +55,12 @@ def crawl(start_url):
         except Exception as e:
             print("Error:", e)
 
-    driver.quit()
     return all_data
 
 
 def export(data):
     df = pd.DataFrame(data)
-
     df.to_csv("output/data.csv", index=False)
-    df.to_excel("output/data.xlsx", index=False)
 
 
 if __name__ == "__main__":
