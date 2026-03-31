@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Universal Scraper</title>
+</head>
+<body>
+  <h2>🌐 Universal Website Scraper</h2>
+
+  <input id="url" placeholder="Enter website URL" style="width:300px;" />
+  <button onclick="scrape()">Scrape</button>
+
+  <p id="status"></p>
+
+  <script>
+    async function scrape() {
+      const url = document.getElementById("url").value;
+      const status = document.getElementById("status");
+
+      status.innerText = "Scraping... please wait ⏳";
+
+      const res = await fetch("/scrape", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ url })
+      });
+
+      if (!res.ok) {
+        status.innerText = "Error occurred ❌";
+        return;
+      }
+
+      const blob = await res.blob();
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "data.csv";
+      a.click();
+
+      status.innerText = "Done ✅ File downloaded";
+    }
+  </script>
+</body>
+</html>
