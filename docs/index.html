@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Scraper · Extract Data Instantly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --bg-dark: #0f172a;
+      --bg-light: #1e293b;
+      --bg-card: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border: #334155;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Main card */
+    .card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 
+        0 0 0 1px var(--border),
+        0 20px 60px var(--shadow);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Input group */
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: color 0.3s;
+    }
+
+    input {
+      width: 100%;
+      padding: 18px 20px 18px 56px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      font-size: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+      transition: all 0.3s;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    input:focus + .input-icon {
+      color: var(--primary);
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status */
+    .status {
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .status.show {
+      display: flex;
+    }
+
+    .status.loading {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+
+    .status.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success);
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--error);
+    }
+
+    .status-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Info panel */
+    .info {
+      margin-top: 48px;
+      padding: 32px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .info h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .info-icon {
+      font-size: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .info-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    /* Progress bar */
+    .progress-container {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .progress-container.show {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--bg-dark);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 3px;
+    }
+
+    .progress-fill.indeterminate {
+      width: 30%;
+      animation: progressIndeterminate 1.5s ease-in-out infinite;
+    }
+
+    @keyframes progressIndeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .card {
+        padding: 32px 24px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">🌐</div>
+      <h1>Web Scraper</h1>
+      <p class="subtitle">Extract content from any website into structured CSV format</p>
+    </header>
+
+    <div class="card">
+      <div class="input-group">
+        <label for="url">Website URL</label>
+        <div class="input-wrapper">
+          <input 
+            id="url" 
+            type="text" 
+            placeholder="https://example.com"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="input-icon">🔗</div>
+        </div>
+      </div>
+
+      <button id="scrapeBtn" class="btn" onclick="scrape()">
+        <span class="btn-content">
+          <span id="btnText">Start Scraping</span>
+        </span>
+      </button>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar">
+          <div class="progress-fill indeterminate" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Initializing...</div>
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="info">
+      <h3>⚡ How It Works</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-icon">🎯</div>
+          <div class="info-text">Crawls up to 5 pages from the target website</div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">📊</div>
+          <div class="info-text">Extracts headings, paragraphs, lists, and tables</div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">⚡</div>
+          <div class="info-text">Processes data in under 60 seconds</div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">💾</div>
+          <div class="info-text">Downloads clean CSV ready for analysis</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Built with Node.js + Python · Powered by Railway</p>
+    </footer>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById("url");
+    const statusDiv = document.getElementById("status");
+    const scrapeBtn = document.getElementById("scrapeBtn");
+    const btnText = document.getElementById("btnText");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressText = document.getElementById("progressText");
+
+    function showStatus(message, type, icon = '') {
+      statusDiv.innerHTML = `
+        <span class="status-icon">${icon}</span>
+        <span>${message}</span>
+      `;
+      statusDiv.className = `status show ${type}`;
+    }
+
+    function hideStatus() {
+      statusDiv.className = "status";
+    }
+
+    function setProgress(text) {
+      progressText.textContent = text;
+    }
+
+    async function scrape() {
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showStatus("Please enter a website URL", "error", "⚠️");
+        return;
+      }
+
+      // Basic URL validation
+      try {
+        const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+        urlInput.value = urlObj.href; // Update with full URL
+      } catch (e) {
+        showStatus("Please enter a valid URL (e.g., https://example.com)", "error", "❌");
+        return;
+      }
+
+      // UI updates
+      scrapeBtn.disabled = true;
+      btnText.innerHTML = '<div class="spinner"></div> Scraping...';
+      progressContainer.classList.add('show');
+      hideStatus();
+
+      const startTime = Date.now();
+      const progressMessages = [
+        "Connecting to website...",
+        "Analyzing page structure...",
+        "Extracting content...",
+        "Processing data...",
+        "Generating CSV..."
+      ];
+
+      let messageIndex = 0;
+      const progressInterval = setInterval(() => {
+        if (messageIndex < progressMessages.length) {
+          setProgress(progressMessages[messageIndex]);
+          messageIndex++;
+        }
+      }, 3000);
+
+      try {
+        const response = await fetch("/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: urlInput.value })
+        });
+
+        clearInterval(progressInterval);
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({ error: "Unknown error occurred" }));
+          throw new Error(error.error || `Server error (${response.status})`);
+        }
+
+        const blob = await response.blob();
+        
+        // Create download
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `scraped_${new Date().toISOString().split('T')[0]}_${Date.now()}.csv`;
+        a.click();
+        
+        URL.revokeObjectURL(a.href);
+
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        showStatus(`Success! Downloaded in ${duration}s`, "success", "✅");
+        progressContainer.classList.remove('show');
+        
+      } catch (error) {
+        clearInterval(progressInterval);
+        console.error("Scraping error:", error);
+        
+        let errorMessage = error.message;
+        if (errorMessage.includes("Failed to fetch")) {
+          errorMessage = "Cannot connect to server. Please check if the backend is running.";
+        }
+        
+        showStatus(errorMessage, "error", "❌");
+        progressContainer.classList.remove('show');
+      } finally {
+        scrapeBtn.disabled = false;
+        btnText.textContent = "Start Scraping";
+      }
+    }
+
+    // Enter key support
+    urlInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !scrapeBtn.disabled) {
+        scrape();
+      }
+    });
+
+    // Auto-focus input on load
+    window.addEventListener('load', () => {
+      urlInput.focus();
+    });
+  </script>
+</body>
+</html>
